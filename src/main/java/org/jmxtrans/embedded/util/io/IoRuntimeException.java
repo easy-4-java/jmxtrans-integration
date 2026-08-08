@@ -27,24 +27,41 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
- * @author <a href="mailto:cleclerc@cloudbees.com">Cyrille Le Clerc</a>
+ * Unchecked wrapper around an {@link IOException}. Modelled after
+ * {@code com.google.common.base.Throwables#propagate(Throwable)} so that the
+ * legacy JmxTrans code base can be written entirely with checked-exception
+ * boundaries while still propagating failures up to generic runtimes such as
+ * scheduled executors.
+ *
+ * <p>{@link #propagate(IOException)} additionally down-casts
+ * {@link FileNotFoundException} to the more specific
+ * {@link FileNotFoundRuntimeException} so that callers can react accordingly
+ * without re-inspecting the original cause.</p>
+ *
+ * <pre>
+ *     try {
+ *         ...
+ *     } catch (IOException e) {
+ *         throw IoRuntimeException.propagate(e);
+ *     }
+ * </pre>
+ *
+ * @author Cyrille Le Clerc
+ * @since 3.0.0
  */
 public class IoRuntimeException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * This method returns an instance {@link IoRuntimeException}.
+     * Wraps the given {@link IOException} in either an
+     * {@link IoRuntimeException} or, when the cause is a
+     * {@link FileNotFoundException}, a {@link FileNotFoundRuntimeException}.
      *
-     * Inspired by {@code com.google.common.base.Throwables#propagate(java.lang.Throwable)}.
-     * <pre>
-     *     try {
-     *         ...
-     *     } catch (IOException e) {
-     *         throw IoRuntimeException.propagate(e);
-     *     }
-     * </pre>
-     * @param e
+     * <p>Inspired by {@code com.google.common.base.Throwables#propagate(java.lang.Throwable)}.</p>
+     *
+     * @param e the checked I/O exception to wrap; must not be {@code null}.
+     * @return a runtime exception that carries {@code e} as its cause.
      */
     public static IoRuntimeException propagate(IOException e) {
         if (e instanceof FileNotFoundException) {
@@ -54,22 +71,50 @@ public class IoRuntimeException extends RuntimeException {
         }
     }
 
+    /**
+     * Default no-args constructor.
+     */
     public IoRuntimeException() {
         super();
     }
 
+    /**
+     * Creates an exception with the given detail message.
+     *
+     * @param message the detail message.
+     */
     public IoRuntimeException(String message) {
         super(message);
     }
 
+    /**
+     * Creates an exception with the given detail message and cause.
+     *
+     * @param message the detail message.
+     * @param cause   the underlying cause.
+     */
     public IoRuntimeException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Creates an exception with full control over the standard
+     * {@link Throwable} flags.
+     *
+     * @param message            the detail message.
+     * @param cause              the underlying cause.
+     * @param enableSuppression  whether suppression is enabled.
+     * @param writableStackTrace whether the stack trace should be writable.
+     */
     protected IoRuntimeException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
+    /**
+     * Creates an exception that wraps the given cause.
+     *
+     * @param cause the underlying cause.
+     */
     public IoRuntimeException(Throwable cause) {
         super(cause);
     }

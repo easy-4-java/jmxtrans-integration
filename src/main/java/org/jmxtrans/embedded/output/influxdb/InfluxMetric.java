@@ -33,13 +33,40 @@ import java.util.Objects;
 import org.jmxtrans.embedded.util.StringUtils2;
 
 /**
+ * Immutable representation of a single measurement that is ready to be
+ * serialised into InfluxDB line protocol.
+ *
+ * <p>A metric is composed of:</p>
+ * <ul>
+ *   <li>a measurement name &mdash; the portion before the first comma in
+ *       the metric name,</li>
+ *   <li>an ordered list of tags,</li>
+ *   <li>an opaque value (numeric, {@link BigDecimal}, or {@link String}),</li>
+ *   <li>and a millisecond-precision timestamp.</li>
+ * </ul>
+ *
+ * <p>The class is thread-safe: all fields are {@code final}. The
+ * {@link #toInfluxFormat()} method performs no mutation either, so it may be
+ * invoked concurrently from the InfluxDB export worker.</p>
+ *
  * @author Kristoffer Erlandsson
+ * @since 3.0.0
+ * @see InfluxTag
+ * @see <a href="https://docs.influxdata.com/influxdb/v1.8/write_protocols/line_protocol_tutorial/">InfluxDB line protocol</a>
  */
 public class InfluxMetric {
 
+    /**
+     * InfluxDB field name used for the value component of the line protocol
+     * representation produced by this class.
+     */
     private static final String FIELD_NAME = "value";
 
     /*
+     * Number format shared by all InfluxMetric instances. The settings come
+     * from influxdb-java's Point implementation to ensure identical textual
+     * output.
+     *
      * See https://github.com/influxdata/influxdb-java/blob/influxdb-java-2.5/src/main/java/org/influxdb/dto/Point.java#L321
      */
     protected final static NumberFormat NUMBER_FORMAT;
@@ -49,11 +76,33 @@ public class InfluxMetric {
         NUMBER_FORMAT.setGroupingUsed(false);
         NUMBER_FORMAT.setMinimumFractionDigits(1);
     }
+
+    /** Measurement timestamp in milliseconds since the Unix epoch. */
     private final long timestampMillis;
+
+    /** Tag list applied to the produced metric, never {@code null}. */
     private final List<InfluxTag> tags;
+
+    /** Measurement name (the "table" name in InfluxDB terms). */
     private final String measurement;
+
+    /** Raw metric value, rendered through {@link #valueAsStr()} at output time. */
     private final Object value;
 
+    /**
+     * Creates a new {@link InfluxMetric}.
+     *
+     * @param measurement    the measurement name; must not be {@code null}.
+     * @param tags           the tags to attach; must not be {@code null}.
+     * @param value          the metric value; must not be {@code null}.
+     *                       Either a numeric type, a {@link BigDecimal} or a
+     *                       value whose {@code toString()} is acceptable as
+     *                       the InfluxDB field value.
+     * @param timestampMillis the measurement timestamp in milliseconds since
+     *                       the Unix epoch.
+     * @throws NullPointerException if any of {@code measurement}, {@code tags}
+     *                       or {@code value} is {@code null}.
+     */
     public InfluxMetric(String measurement, List<InfluxTag> tags, Object value, long timestampMillis) {
         this.measurement = Objects.requireNonNull(measurement);
         this.tags = Objects.requireNonNull(tags);
@@ -61,22 +110,56 @@ public class InfluxMetric {
         this.timestampMillis = timestampMillis;
     }
 
+    /**
+     * Returns the measurement timestamp in milliseconds since the Unix
+     * epoch.
+     *
+     * @return the timestamp in milliseconds.
+     */
     public long getTimestampMillis() {
         return timestampMillis;
     }
 
+    /**
+     * Returns the tags attached to this metric, in declaration order.
+     *
+     * @return an immutable view of the tag list.
+     */
     public List<InfluxTag> getTags() {
         return tags;
     }
 
+    /**
+     * Returns the measurement name ("table name" in InfluxDB terms).
+     *
+     * @return the measurement name, never {@code null}.
+     */
     public String getMeasurement() {
         return measurement;
     }
 
+    /**
+     * Returns the metric value as it should appear in InfluxDB line protocol.
+     *
+     * <p>{@link Integer} and {@link Long} values are suffixed with the InfluxDB
+     * {@code i} integer qualifier; {@link Float}, {@link Double} and
+     * {@link BigDecimal} values go through {@link #NUMBER_FORMAT}; everything
+     * else is rendered via {@link Object#toString()}.</p>
+     *
+     * @return the value rendered as a {@link String}.
+     */
     public Object getValue() {
         return valueAsStr();
     }
 
+    /**
+     * Serialises the metric into InfluxDB line protocol, for example:
+     * <pre>
+     * measurement,tag1=v1,tag2=v2 value=42 1700000000000
+     * </pre>
+     *
+     * @return the textual line-protocol representation; never {@code null}.
+     */
     public String toInfluxFormat() {
         StringBuilder sb = new StringBuilder();
         sb.append(measurement);
@@ -93,6 +176,12 @@ public class InfluxMetric {
         return sb.toString();
     }
 
+    /**
+     * Renders {@link #value} as a textual field value suitable for the Influx
+     * line protocol.
+     *
+     * @return the textual representation; never {@code null}.
+     */
     private String valueAsStr() {
         if (value instanceof Integer || value instanceof Long) {
             return value.toString() + "i";
@@ -105,6 +194,12 @@ public class InfluxMetric {
         return value.toString();
     }
 
+    /**
+     * Renders every tag through {@link InfluxTag#toInfluxFormat()}.
+     *
+     * @return a mutable list of tag strings in the same order as
+     *         {@link #tags}; never {@code null}.
+     */
     private List<String> convertTagsToStrings() {
         List<String> l = new ArrayList<String>(tags.size());
         for (InfluxTag influxTag : tags) {

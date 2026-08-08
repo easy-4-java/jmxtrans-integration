@@ -33,11 +33,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Quiet close helpers for the various I/O resources used by JmxTrans.
+ *
+ * <p>The {@link #closeQuietly(Closeable)} family of methods swallows any
+ * exception thrown by {@link Closeable#close()} so that they can be safely
+ * chained in {@code finally} blocks where the surrounding code has no good
+ * strategy for handling close failures. Use them sparingly &mdash; the
+ * underlying streams may still leak if the JVM holds onto the resource
+ * beyond the close attempt.</p>
+ *
+ * @author [@Loong Wan](https://github.com/loong10k)
+ * @since 3.0.0
  */
 public class IoUtils {
-	
+
+    /** SLF4J logger used by the various close helpers. */
     protected final static Logger logger = LoggerFactory.getLogger(IoUtils.class.getName());
 
+    /**
+     * Quietly closes a {@link URLConnection}, falling back to
+     * {@link HttpURLConnection#disconnect()} when the connection is an HTTP
+     * connection. Null connections are accepted as no-ops.
+     *
+     * @param cnn the connection to close / disconnect; may be {@code null}.
+     */
     public static void closeQuietly (URLConnection cnn) {
         if (cnn == null) {
             return;
@@ -47,7 +66,13 @@ public class IoUtils {
             // do nothing
         }
     }
-    
+
+    /**
+     * Quietly closes a {@link Closeable}, swallowing every exception thrown
+     * by {@link Closeable#close()}. Null arguments are accepted as no-ops.
+     *
+     * @param closeable the closeable to close; may be {@code null}.
+     */
     public static void closeQuietly(Closeable closeable) {
         if (closeable == null)
             return;
@@ -58,6 +83,12 @@ public class IoUtils {
         }
     }
 
+    /**
+     * Quietly closes a {@link Writer}, swallowing every exception. Null
+     * arguments are accepted as no-ops.
+     *
+     * @param writer the writer to close; may be {@code null}.
+     */
     public static void closeQuietly(Writer writer) {
         if (writer == null)
             return;
@@ -69,7 +100,11 @@ public class IoUtils {
     }
 
     /**
-     * Needed for old JVMs where {@link java.io.InputStream} does not implement {@link java.io.Closeable}.
+     * Quietly closes an {@link InputStream}, swallowing every exception.
+     * Needed for old JVMs where {@link InputStream} does not implement
+     * {@link Closeable}. Null arguments are accepted as no-ops.
+     *
+     * @param inputStream the input stream to close; may be {@code null}.
      */
     public static void closeQuietly(InputStream inputStream) {
         if (inputStream == null)
@@ -80,5 +115,5 @@ public class IoUtils {
             // ignore silently
         }
     }
-      
+
 }
