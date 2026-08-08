@@ -111,8 +111,8 @@
 					<version>2.19.1</version>
 					<configuration>
 						<!-- 跳过单元测试 -->
-						<skip>true</skip>
-						<skipTests>true</skipTests>
+						<skip>false</skip>
+						<skipTests>false</skipTests>
 						<!--
 							forkMode 可设置值有 “never”， “once”， “always” 和 “pertest”。
 							pretest： 每一个测试创建一个新进程，为每个测试创建新的JVM是单独测试的最彻底方式，但也是最慢的，不适合hudson上持续回归。
@@ -270,6 +270,7 @@
 		<spring.version>4.3.11.RELEASE</spring.version><!-- 4.3.x（JDK 1.7 ）、4.1.x（JDK 1.6）、4.0.x（JDK 1.6） -->
 		<log4j.version>1.2.17</log4j.version>
 		<druid.version>1.0.31</druid.version>
+        <maven-central-publishing-plugin.version>0.11.0</maven-central-publishing-plugin.version>
 	</properties>
 	
 	<dependencyManagement>
