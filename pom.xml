@@ -120,7 +120,7 @@
 							always：在一个进程中并行的运行脚本，Junit4.7以上版本才可以使用，surefire的版本要在2.6以上提供这个功能，其中 threadCount：执行时，指定可分配的线程数量。只和参数parallel配合使用有效。默认：5。
 						 -->
 						<forkMode>once</forkMode>
-						<argLine>-Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=256m -Dfile.encoding=UTF-8</argLine> 
+						<argLine>-Xmx1024m -Dfile.encoding=UTF-8</argLine> 
 						<additionalClasspathElements> 
 			                <additionalClasspathElement>${basedir}/target/test-classes</additionalClasspathElement>  
 			            </additionalClasspathElements>  
