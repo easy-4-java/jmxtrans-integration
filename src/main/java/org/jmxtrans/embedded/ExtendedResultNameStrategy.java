@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * sandboxed) the failure is logged but the strategy remains usable with the
  * default evaluators inherited from the parent class.</p>
  *
- * @author [@Loong Wan](https://github.com/loong10k)
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
  * @since 3.0.0
  * @see ResultNameStrategy
  * @see MacAddressUtils#getMacAddress()

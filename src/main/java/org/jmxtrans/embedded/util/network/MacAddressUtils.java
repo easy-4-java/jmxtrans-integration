@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * approach only works against a co-operative remote host that exposes the
  * NetBIOS name service on UDP port 137.</p>
  *
- * @author [@Loong Wan](https://github.com/loong10k)
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
  * @since 3.0.0
  */
 public class MacAddressUtils {

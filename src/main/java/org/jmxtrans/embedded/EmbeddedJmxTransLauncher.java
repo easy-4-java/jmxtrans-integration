@@ -30,7 +30,7 @@ import javax.annotation.Resource;
  * {@code javax.annotation.Resource}-injected field so that the embedded
  * exporter starts as part of the surrounding application context.</p>
  *
- * @author [@Loong Wan](https://github.com/loong10k)
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
  * @since 3.0.0
  * @see EmbeddedJmxTrans
  * @see javax.annotation.Resource
