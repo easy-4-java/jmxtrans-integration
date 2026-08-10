@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * underlying streams may still leak if the JVM holds onto the resource
  * beyond the close attempt.</p>
  *
- * @author [@Loong Wan](https://github.com/loong10k)
+ * @author <a href="https://github.com/loong10k">Loong Wan</a>
  * @since 3.0.0
  */
 public class IoUtils {
