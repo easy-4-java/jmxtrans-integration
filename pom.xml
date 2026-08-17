@@ -263,7 +263,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Dependency versions -->
 		<druid.version>1.0.31</druid.version>
-		<jackson.version>2.18.3</jackson.version>
+		<jackson.version>2.18.8</jackson.version>
 		<jmxtrans.versin>270</jmxtrans.versin>
 		<junit.version>4.13.2</junit.version>
 		<!-- 4.3.x（JDK 1.7 ）、4.1.x（JDK 1.6）、4.0.x（JDK 1.6） -->
