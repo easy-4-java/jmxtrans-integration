@@ -95,6 +95,9 @@ public class InfluxDbOutputWriter extends AbstractOutputWriter implements Output
     /** Configuration key for the master enable/disable switch. */
 	public final static String SETTING_ENABLED = "enabled";
 
+	/** 日志中密码的掩码占位符（仅用于输出，不参与认证）。 */
+	private final static String LOG_MASK = "****";
+
 	/** Counter of consecutive export failures; thread-safe via {@link AtomicInteger}. */
 	private final AtomicInteger exceptionCounter = new AtomicInteger();
 
@@ -186,10 +189,10 @@ public class InfluxDbOutputWriter extends AbstractOutputWriter implements Output
         if(LOG.isInfoEnabled()){
 
 			LOG.info("Starting Stackdriver writer connected to '{}', proxy {} ...", url, proxy);
-	        LOG.info( "InfluxDbOutputWriter is configured with url=" + urlStr
-	                + ", database=" + database
-	                + ", user=" + user
-	                + ", password=" + (password != null ? "****" : null)
+		        LOG.info( "InfluxDbOutputWriter is configured with url=" + urlStr
+		                + ", database=" + database
+		                + ", user=" + user
+		                + ", password=" + (password != null ? LOG_MASK : null)
 	                + ", tags=" + tagsStr
 	                + ", connectTimeoutMills=" + connectTimeoutMillis
 	                + ", readTimeoutMillis=" + readTimeoutMillis);
